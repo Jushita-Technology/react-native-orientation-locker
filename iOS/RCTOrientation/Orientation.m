@@ -23,7 +23,7 @@
 #if (!TARGET_OS_TV)
 static UIInterfaceOrientationMask _orientationMask = UIInterfaceOrientationMaskAll;
 
-+ (void)setOrientation: (UIInterfaceOrientationMask)orientationMask {
++ (void)setOrientation:(UIInterfaceOrientationMask)orientationMask {
     _orientationMask = orientationMask;
 }
 
@@ -33,7 +33,7 @@ static UIInterfaceOrientationMask _orientationMask = UIInterfaceOrientationMaskA
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"orientationDidChange",@"deviceOrientationDidChange",@"lockDidChange"];
+    return @[@"orientationDidChange", @"deviceOrientationDidChange", @"lockDidChange"];
 }
 
 - (instancetype)init
@@ -57,7 +57,7 @@ static UIInterfaceOrientationMask _orientationMask = UIInterfaceOrientationMaskA
 }
 
 - (UIInterfaceOrientation)getDeviceOrientation {
-    UIInterfaceOrientation deviceOrientation = (UIInterfaceOrientation) [UIDevice currentDevice].orientation;
+    UIInterfaceOrientation deviceOrientation = (UIInterfaceOrientation)[UIDevice currentDevice].orientation;
     
     BOOL isFaceUpDown = deviceOrientation == UIDeviceOrientationFaceUp || deviceOrientation == UIDeviceOrientationFaceDown;
     if (_disableFaceUpDown && isFaceUpDown) {
@@ -73,56 +73,50 @@ static UIInterfaceOrientationMask _orientationMask = UIInterfaceOrientationMaskA
     UIInterfaceOrientation deviceOrientation = [self getDeviceOrientation];
     
     // do not send Unknown Orientation
-    if (deviceOrientation==UIInterfaceOrientationUnknown) {
+    if (deviceOrientation == UIInterfaceOrientationUnknown) {
         return;
     }
     
-    if (orientation!=UIInterfaceOrientationUnknown && orientation!=_lastOrientation) {
+    if (orientation != UIInterfaceOrientationUnknown && orientation != _lastOrientation) {
         [self sendEventWithName:@"orientationDidChange" body:@{@"orientation": [self getOrientationStr:orientation]}];
         _lastOrientation = orientation;
     }
     
     // when call lockToXXX, not sent deviceOrientationDidChange
-    if (!_isLocking && deviceOrientation!=_lastDeviceOrientation) {
+    if (!_isLocking && deviceOrientation != _lastDeviceOrientation) {
         [self sendEventWithName:@"deviceOrientationDidChange" body:@{@"deviceOrientation":[self getOrientationStr:deviceOrientation]}];
         _lastDeviceOrientation = deviceOrientation;
     }
 }
 
-- (NSString *)getOrientationStr: (UIInterfaceOrientation)orientation {
+- (NSString *)getOrientationStr:(UIInterfaceOrientation)orientation {
     
     NSString *orientationStr;
     switch (orientation) {
         case UIInterfaceOrientationPortrait:
-            
             orientationStr = @"PORTRAIT";
             break;
             
         case UIInterfaceOrientationLandscapeLeft:
-            
             orientationStr = @"LANDSCAPE-RIGHT";
             break;
             
         case UIInterfaceOrientationLandscapeRight:
-            
             orientationStr = @"LANDSCAPE-LEFT";
             break;
             
         case UIInterfaceOrientationPortraitUpsideDown:
-            
             orientationStr = @"PORTRAIT-UPSIDEDOWN";
             break;
-        
+            
         case UIDeviceOrientationFaceUp:
-
             orientationStr = @"FACE-UP";
             break;
-
+            
         case UIDeviceOrientationFaceDown:
-        
             orientationStr = @"FACE-DOWN";
             break;
-
+            
         default:
             orientationStr = @"UNKNOWN";
             break;
@@ -130,10 +124,10 @@ static UIInterfaceOrientationMask _orientationMask = UIInterfaceOrientationMaskA
     return orientationStr;
 }
 
-- (void)lockToOrientation:(UIInterfaceOrientation) newOrientation usingMask:(UIInterfaceOrientationMask) mask  {
+- (void)lockToOrientation:(UIInterfaceOrientation)newOrientation usingMask:(UIInterfaceOrientationMask)mask {
     // set a flag so that no deviceOrientationDidChange events are sent to JS
     _isLocking = YES;
-    NSString* orientation = @"orientation";
+    NSString *orientation = @"orientation";
     
     UIInterfaceOrientation deviceOrientation = _lastDeviceOrientation;
     
@@ -141,10 +135,12 @@ static UIInterfaceOrientationMask _orientationMask = UIInterfaceOrientationMaskA
     
     if (@available(iOS 16.0, *)) {
         NSArray *array = [[[UIApplication sharedApplication] connectedScenes] allObjects];
-        UIWindowScene *scene = (UIWindowScene *)array[0];    UIWindowSceneGeometryPreferencesIOS *geometryPreferences = [[UIWindowSceneGeometryPreferencesIOS alloc] initWithInterfaceOrientations:mask];
-        [scene requestGeometryUpdateWithPreferences:geometryPreferences errorHandler:^(NSError * _Nonnull error) { }];
+        UIWindowScene *scene = (UIWindowScene *)array[0];
+        UIWindowSceneGeometryPreferencesIOS *geometryPreferences = [[UIWindowSceneGeometryPreferencesIOS alloc] initWithInterfaceOrientations:mask];
+        [scene requestGeometryUpdateWithPreferences:geometryPreferences errorHandler:^(NSError *_Nonnull error) {
+        }];
     } else {
-        UIDevice* currentDevice = [UIDevice currentDevice];
+        UIDevice *currentDevice = [UIDevice currentDevice];
         [currentDevice setValue:@(UIInterfaceOrientationUnknown) forKey:orientation];
         [currentDevice setValue:@(newOrientation) forKey:orientation];
     }
@@ -236,18 +232,17 @@ RCT_EXPORT_METHOD(lockToLandscape)
         NSString *orientationStr = [self getOrientationStr:orientation];
         
         // when call lockXXX, make sure to sent orientationDidChange event to JS
-        [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: UIInterfaceOrientationUnknown] forKey:@"orientation"];
+        [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:UIInterfaceOrientationUnknown] forKey:@"orientation"];
         
         if ([orientationStr isEqualToString:@"LANDSCAPE-RIGHT"]) {
             [Orientation setOrientation:UIInterfaceOrientationMaskLandscape];
-            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: UIInterfaceOrientationLandscapeLeft] forKey:@"orientation"];
+            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:UIInterfaceOrientationLandscapeLeft] forKey:@"orientation"];
         } else {
             [Orientation setOrientation:UIInterfaceOrientationMaskLandscape];
-            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: UIInterfaceOrientationLandscapeRight] forKey:@"orientation"];
+            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:UIInterfaceOrientationLandscapeRight] forKey:@"orientation"];
             // restore device orientation
-            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: deviceOrientation] forKey:@"orientation"];
+            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:deviceOrientation] forKey:@"orientation"];
         }
-        
         
         [UIViewController attemptRotationToDeviceOrientation];
         
@@ -255,7 +250,6 @@ RCT_EXPORT_METHOD(lockToLandscape)
         [self sendEventWithName:@"lockDidChange" body:@{@"orientation":@"LANDSCAPE-LEFT"}];
         
         _isLocking = NO;
-        
     }];
 #endif
 }
