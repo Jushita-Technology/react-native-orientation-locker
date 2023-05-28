@@ -244,10 +244,10 @@ RCT_EXPORT_METHOD(lockToLandscape)
         } else {
             [Orientation setOrientation:UIInterfaceOrientationMaskLandscape];
             [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: UIInterfaceOrientationLandscapeRight] forKey:@"orientation"];
+            // restore device orientation
+            [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: deviceOrientation] forKey:@"orientation"];
         }
         
-        // restore device orientation
-        [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: deviceOrientation] forKey:@"orientation"];
         
         [UIViewController attemptRotationToDeviceOrientation];
         
