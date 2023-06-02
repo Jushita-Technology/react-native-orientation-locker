@@ -35,6 +35,10 @@ export default class Orientation {
     // ios only
   };
 
+  static mountListener = () => {
+    OrientationNative.mountListener();
+  };
+
   static getOrientation = (cb) => {
     OrientationNative.getOrientation((orientation) => {
       cb(orientation);
